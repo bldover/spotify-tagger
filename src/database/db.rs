@@ -107,6 +107,10 @@ pub fn remove_tag_from_song_uri(uri: &str, tag_name: &str, pool: web::Data<DbPoo
 
     let tags = query_tags_for_song_uri(uri, pool)?;
     if tags.is_empty() {
+        let song_id_subquery = songs::dsl::songs
+            .filter(songs::dsl::song_uri.eq(uri))
+            .select(songs::dsl::song_id)
+            .into_boxed();
         diesel::delete(songs::dsl::songs
             .filter(songs::dsl::song_id.eq_any(song_id_subquery)))
             .execute(connection)?;
